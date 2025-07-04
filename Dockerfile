@@ -1,8 +1,11 @@
-FROM node:20
+# Multistage build
+# 1 - Build stage
+# O AS é um alias (apelido), ele indica que esta linha é uma etapa de construção (build)
+FROM node:20-alpine AS build
 
 WORKDIR /usr/src/app
 
-COPY package.json ./
+COPY package*.json ./
 
 RUN npm install
 
@@ -12,6 +15,16 @@ COPY . .
 
 RUN npm run build
 
-EXPOSE 5173
+# 2 - Production stage
+FROM node:20-alpine
 
-CMD ["npm", "run", "dev"]
+WORKDIR /usr/src/app
+
+# Copiando do estágio de construção para o estágio de produção
+COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build /usr/src/app/package.json ./package.json
+COPY --from=build /usr/src/app/node_modules ./node_modules
+
+EXPOSE 4173
+
+CMD ["npm", "run", "preview"]
