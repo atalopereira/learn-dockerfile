@@ -1,0 +1,43 @@
+version: '3.7'
+
+services:
+  mysql_website:
+    image: mysql:8.0
+    container_name: mysql_website
+    volumes:
+      - db:/var/lib/mysql
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    networks:
+      - react-website-network
+    
+  react-website:
+    build:
+      context: .
+    container_name: react-website
+    ports:
+      - '3001:4173'
+    depends_on:
+      - mysql_website
+    networks:
+      - react-website-network
+    environment:
+      - VITE_API_URL=${VITE_API_URL}
+
+networks:
+  react-website-network:
+    name: react-website-network
+    driver: bridge
+
+volumes:
+  db:
+
+
+  
+
+
